@@ -54,7 +54,7 @@ client.connect()
 
 # Now the program needs to use a client loop function to ensure messages are
 # sent and received.  There are a few options for driving the message loop,
-# depending on what your program needs to do.  
+# depending on what your program needs to do.
 
 # The first option is to run a thread in the background so you can continue
 # doing things in your program.
@@ -88,7 +88,7 @@ fc = owm.three_hours_forecast_at_id(place_id)
 
 f = fc.get_forecast()
 ws = f.get_weathers()
-w = ws[2] # 0:0-2 hours later, 1: 3-5 hours later, 2: 6-8 hours later 
+w = ws[2] # 0:0-2 hours later, 1: 3-5 hours later, 2: 6-8 hours later
 
 def getIconData(icon_name):
     if len(icon_name) != 3:
@@ -111,7 +111,7 @@ def getIconData(icon_name):
 # cmd 0x00 Test commands
 def cmdTest_display_faceSmiley():
     client.publish('matrix_command', '0000')
-    
+
 def cmdTest_display_faceNeutral():
     client.publish('matrix_command', '0001')
 
@@ -121,18 +121,18 @@ def cmdTest_display_faceFrown():
 def cmdTest_display_allFullBrightness():
     # good for current draw test
     client.publish('matrix_command', '00FE')
-    
+
 def cmdTest_display_standby():
-    # Set 8x8 LED matrix to default standby state; turn on only one LED at 
+    # Set 8x8 LED matrix to default standby state; turn on only one LED at
     # lower right corner, set brightness to 5, set blink rate to 3.
     client.publish('matrix_command', '00FF')
-    
+
 def cmdTest_display_weather():
     # show rain icon at default brightness and blink rate
     client.publish('matrix_command', '00FD')
 
 def cmdTest_display_A():
-    client.publish('matrix_command', '0005')
+    client.publish('matrix_command', '00FC')
 
 
 # cmd 0x01 display icon commands
@@ -142,14 +142,22 @@ def cmdDisplayIcon(icon_data):
     msg = '01'+icon_data+'00'
     client.publish('matrix_command', msg)
     print('published: {}'.format(msg))
-       
+
 # cmd 0x02 Text scrolling commands
-def cmdTextScroll():
-    pass
+def cmdTextScroll(message):
+    # mosquitto_pub -t DEVICEID/feeds/matrix_command -m "02Max 17 characters"
+    # max characters are not 17 anymore as it's not BLE
+    msg = '02' + message
+    client.publish('matrix_command', msg)
+    print('published: {}'.format(msg))
 
 # cmd 0x03 Text scrolling control commands
-def cmdTextScroll_set_speed():
-    pass
+def cmdTextScroll_setting(speed=25, repeat=3):
+    # Speed 0 to 255
+    # repeat 0 to 255
+    msg = '03' + '{:02X}'.format(speed) + '{:02X}'.format(repeat)
+    client.publish('matrix_command', msg)
+    print('published: {}'.format(msg))
 
 def cmdTextScroll_set_repeat():
     pass
@@ -159,14 +167,14 @@ def cmdSetting_set_brightness(brightness):
     # brightness: integer value from 0 to 15
     # 0: dimmest, 15: brightest
     if (brightness>=0 and brightness<=15):
-        command = 'FF00' + hex(brightness)[-1].upper()
-        client.publish(command)
+        command = 'FF00' + '0' + hex(brightness)[-1].upper()
+        client.publish('matrix_command', command)
 
 def cmdSetting_set_rotation(rotation):
     # rotation: integer value from 0 to 3
     if (rotation>=0 and rotation<=3):
-        command = 'FF01' + hex(rotation)[-1].upper()
-        client.publish(command)
+        command = 'FF01' + '0' + hex(rotation)[-1].upper()
+        client.publish('matrix_command', command)
 
 def cmdSetting_set_blinkRate(blink):
     # blink: integer value from 0 to 3
@@ -174,10 +182,11 @@ def cmdSetting_set_blinkRate(blink):
     # 0x01: 2Hz fast 0x02: 1Hz
     # 0x03: 0.5Hz slow
     if (blink>=0 and blink<=3):
-        command = 'FF02' + hex(blink)[-1].upper()
-        client.publish(command)
+        command = 'FF02' + '0' + hex(blink)[-1].upper()
+        client.publish('matrix_command', command)
 
 icon_name = w.get_weather_icon_name() # u'03n', u'02n'
 icon_data = getIconData(icon_name)
+cmdSetting_set_blinkRate(0)
 cmdDisplayIcon(icon_data)
-client.disconnect()
+#client.disconnect()
