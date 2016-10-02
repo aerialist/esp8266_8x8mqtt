@@ -24,9 +24,9 @@ def connected(client):
     # This is a good place to subscribe to feed changes.  The client parameter
     # passed to this function is the Adafruit IO MQTT client so you can make
     # calls against it easily.
-    print('Connected to Adafruit IO!  Listening for matrix_debug messages...')
+    print('Connected to Adafruit IO!')
     # Subscribe to changes on a feed named DemoFeed.
-    client.subscribe('matrix_debug')
+    #client.subscribe('matrix_debug')
 
 def disconnected(client):
     # Disconnected function will be called when the client disconnects.
@@ -189,4 +189,4 @@ icon_name = w.get_weather_icon_name() # u'03n', u'02n'
 icon_data = getIconData(icon_name)
 cmdSetting_set_blinkRate(0)
 cmdDisplayIcon(icon_data)
-#client.disconnect()
+client.disconnect()
