@@ -21,6 +21,7 @@
   MIT license, all text above must be included in any redistribution
  ****************************************************/
 #include <ESP8266WiFi.h>
+
 #include "Adafruit_MQTT.h"
 #include "Adafruit_MQTT_Client.h"
 
@@ -42,7 +43,8 @@ const char* fingerprint = "26 96 1C 2A 51 07 FD 15 80 96 93 AE F7 32 CE B9 0D 01
 
 // Setup a feed called 'test' for publishing.
 // Notice MQTT paths for AIO follow the form: <username>/feeds/<feedname>
-Adafruit_MQTT_Publish test = Adafruit_MQTT_Publish(&mqtt, AIO_USERNAME "/feeds/test");
+Adafruit_MQTT_Publish pub_debug = Adafruit_MQTT_Publish(&mqtt, AIO_USERNAME "/feeds/matrix_debug");
+Adafruit_MQTT_Subscribe sub_matrix = Adafruit_MQTT_Subscribe(&mqtt, AIO_USERNAME "/feeds/matrix_command");
 
 /*************************** Sketch Code ************************************/
 
@@ -93,7 +95,7 @@ void loop() {
   Serial.print(F("\nSending val "));
   Serial.print(x);
   Serial.print(F(" to test feed..."));
-  if (! test.publish(x++)) {
+  if (! pub_debug.publish(x++)) {
     Serial.println(F("Failed"));
   } else {
     Serial.println(F("OK!"));
