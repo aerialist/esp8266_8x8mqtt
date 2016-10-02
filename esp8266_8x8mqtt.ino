@@ -25,8 +25,14 @@
 #include "Adafruit_MQTT.h"
 #include "Adafruit_MQTT_Client.h"
 
+#include <Wire.h>
+#include "Timer.h"
+#include "Adafruit_LEDBackpack.h"
+#include "Adafruit_GFX.h"
+
 // WiFi ap and aio creditials are in secret.h
 #include "secret.h"
+#include "icons.h"
 
 /************ Global State (you don't need to change this!) ******************/
 
@@ -53,11 +59,24 @@ Adafruit_MQTT_Subscribe sub_matrix = Adafruit_MQTT_Subscribe(&mqtt, AIO_USERNAME
 void MQTT_connect();
 void verifyFingerprint();
 
+uint8_t delay_ms = 100;
+uint8_t nrepeat = 3;
+
+Adafruit_8x8matrix matrix = Adafruit_8x8matrix();
+
+
 void setup() {
   Serial.begin(115200);
   delay(10);
+  Serial.println(F("MQTT matrix"));
 
-  Serial.println(F("Adafruit IO MQTTS (SSL/TLS) Example"));
+  Wire.pins(4,5); // ESP8266 default I2C pins: SCL 4, SDA 5
+  matrix.begin(0x70);
+  matrix.setRotation(0);
+  matrix.setBrightness(0); //0 to 15
+  matrix.blinkRate(3);
+  matrix.clear();
+  matrix.writeDisplay();
 
   // Connect to WiFi access point.
   Serial.println(); Serial.println();
@@ -81,6 +100,8 @@ void setup() {
   // check the fingerprint of io.adafruit.com's SSL cert
   verifyFingerprint();
 
+  matrix.drawBitmap(0, 0, smile_bmp, 8, 8, LED_ON);
+  matrix.writeDisplay();
 }
 
 uint32_t x=0;
