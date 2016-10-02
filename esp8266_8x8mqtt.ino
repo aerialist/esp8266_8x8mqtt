@@ -100,6 +100,9 @@ void setup() {
   // check the fingerprint of io.adafruit.com's SSL cert
   verifyFingerprint();
 
+  // Setup MQTT subscription for onoff feed.
+  mqtt.subscribe(&sub_matrix);
+
   matrix.drawBitmap(0, 0, smile_bmp, 8, 8, LED_ON);
   matrix.writeDisplay();
 }
@@ -112,19 +115,15 @@ void loop() {
   // function definition further below.
   MQTT_connect();
 
-  // Now we can publish stuff!
-  Serial.print(F("\nSending val "));
-  Serial.print(x);
-  Serial.print(F(" to test feed..."));
-  if (! pub_debug.publish(x++)) {
-    Serial.println(F("Failed"));
-  } else {
-    Serial.println(F("OK!"));
+  Adafruit_MQTT_Subscribe *subscription;
+  while ((subscription = mqtt.readSubscription(5000))) {
+    if (subscription == &sub_matrix) {
+      Serial.print(F("Got: "));
+      Serial.println((char *)sub_matrix.lastread);
+      Serial.print(F("Data length: "));
+      Serial.println(sub_matrix.datalen);
+    }
   }
-
-  // wait a couple seconds to avoid rate limit
-  delay(2000);
-
 }
 
 
